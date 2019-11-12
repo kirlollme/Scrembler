@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <QDebug>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
@@ -68,25 +69,13 @@ void MainWindow::slotTableChanged(QTableWidgetItem * itm) const
 
 void MainWindow::slotStart() const
 {
+
 	CheckTable();
+	auto a = ui_.table;
+	GetScremblerSettings();
 	time_t start;
 	time(&start);
-	settings_.scremblers = {};
-	settings_.period = ui_.period_input->text().toULongLong();
-	for (int i = 0; i < settings_.scremblers_count; i++)
-	{
-		auto polinoms =  ui_.table->item(i,0)->text();
-		auto startpos = GetContent(i,1);
-		auto period = GetContent(i,2);
-		auto word_size = ui_.scrembler_word_input->currentIndex() + 1;
-		Scrembler * scrmblr = new Scrembler(polinoms,startpos,period, word_size);
-		settings_.scremblers.push_back(scrmblr);
-
-		auto pos_in_code =  GetContent(i,3).toInt();
-		settings_.positions_in_code[pos_in_code - 1] = i;
-	}
-	code_.Work(settings_.path_to_file, settings_.scremblers ,settings_.positions_in_code,settings_.period);
-	code_.processed_bytes_ = 0;
+	encoder_ = new Worker(settings_);
 	time_t end;
 	time(&end);
 	QMessageBox::information(0,"Успешно","Кодировка прошла успешно за " + QString::number(end - start) + "с!");
@@ -100,9 +89,10 @@ void MainWindow::CreateRows() const
 	std::vector <QString> header_list
 	{ 
 		"Полином",
+		"Номер в кодировании",
+		"Тип Скремблера",
 		"Начальная установка",
-		"Период",
-		"Номер в кодировании"
+		"Период"
 	};
 
 	std::vector <QString> size_word 
@@ -116,9 +106,10 @@ void MainWindow::CreateRows() const
 	ui_.table->setRowCount(0);
 	ui_.table->setColumnCount(header_list.size());
 	ui_.table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	ui_.table->setEnabled(1);
 
 
-	for (int i = 0; i < header_list.size(); i++)
+	for (int i = 0; i < header_list.size(); ++i)
 	{
 		QTableWidgetItem *hnm_1 = new QTableWidgetItem();
 		hnm_1->setText(header_list[i]);
@@ -126,50 +117,81 @@ void MainWindow::CreateRows() const
 
 	}
 	
-	for (size_t i = 0 ; i < settings_.scremblers_count; i++)
+	for (size_t i = 0 ; i < settings_.scremblers_count; ++i)
 	{
 		ui_.table->insertRow(ui_.table->rowCount());
 
 	} 
 	// полиномы
-	for (size_t i = 0 ; i < settings_.scremblers_count; i++)
+	for (size_t i = 0 ; i < settings_.scremblers_count; ++i)
 	{
 		QTableWidgetItem *item = new QTableWidgetItem();
 		item->setText("10,8,2");
 		ui_.table->setItem(i, 0, item);
+	}
+	// порядок в кодировании
+	for (size_t i = 0 ; i < settings_.scremblers_count; ++i)
+	{
+		QLineEdit *edit = new QLineEdit(ui_.table);
+		edit->setFrame(false);
+		edit->setValidator(new QIntValidator(1, settings_.scremblers_count, edit));	 
+		edit->setText(QString::number(i+1));
+		ui_.table->setCellWidget(i, 1, edit);
 	} 
+	// вид скремблера
+	for (size_t i = 0; i < settings_.scremblers_count; ++i)
+	{
+		QComboBox *item = new QComboBox();
+		item->addItem("Аддитивный",1);
+		item->addItem("Мультипликативный",0);
+		item->setFrame(false);
+		connect( item, SIGNAL( 	currentIndexChanged(int)), this, SLOT(slotChangeType(int)));
+		ui_.table->setCellWidget(i, 2, item);
+		
+	}
 	//начальное состояние
-	for (size_t i = 0 ; i < settings_.scremblers_count; i++)
+
+	for (size_t i = 0 ; i < settings_.scremblers_count; ++i)
 	{
 		QLineEdit *edit = new QLineEdit(ui_.table);
 		edit->setFrame(false);
 		edit->setText("1010000010");
 		
 		edit->setValidator(new QRegExpValidator(QRegExp( size_word[ ui_.scrembler_word_input->currentIndex( ) ] + QString::number( 10 )  + "}" ) , edit ) );
-		ui_.table->setCellWidget(i, 1, edit);
+		ui_.table->setCellWidget(i, 3, edit);
 	} 
 	// период
 
-	for (size_t i = 0 ; i < settings_.scremblers_count; i++)
+	for (size_t i = 0 ; i < settings_.scremblers_count; ++i)
 	{
 		QLineEdit *edit = new QLineEdit(ui_.table);
 		edit->setFrame(false);
 		edit->setText("1024");
 		edit->setValidator(new QIntValidator());	 
-		ui_.table->setCellWidget(i, 2, edit);
+		ui_.table->setCellWidget(i, 4, edit);
 	}
-	// порядок в кодировании
-	for (size_t i = 0 ; i < settings_.scremblers_count; i++)
-	{
-		QLineEdit *edit = new QLineEdit(ui_.table);
-		edit->setFrame(false);
-		edit->setValidator(new QIntValidator(1, settings_.scremblers_count, edit));	 
-		edit->setText(QString::number(i+1));
-		ui_.table->setCellWidget(i, 3, edit);
-	} 
-	ui_.table				-> setEnabled(1);
 }
+void MainWindow::slotChangeType(int a) const	
+{
 
+	for (int i  = 0 ; i < settings_.scremblers_count; ++i)
+	{
+		auto cell = ui_.table->cellWidget(i,2);
+		auto combo = dynamic_cast<QComboBox*>(cell);
+		if (combo->currentIndex() == 1)
+		{
+			ui_.table->cellWidget(i,3)->setEnabled(0);
+			ui_.table->cellWidget(i,4)->setEnabled(0);
+
+		}
+		else 
+		{
+			ui_.table->cellWidget(i,3)->setEnabled(1);
+			ui_.table->cellWidget(i,4)->setEnabled(1);
+		}
+	}
+
+}	
 void MainWindow::slotBlockScrembler() const
 {
 	ui_.table ->setEnabled(0);
@@ -181,7 +203,7 @@ void MainWindow::slotBlockScrembler() const
 
 bool MainWindow::CheckPolinoms() const
 {
-	for (int i = 0 ; i < settings_.scremblers_count ; i++)
+	for (int i = 0 ; i < settings_.scremblers_count ; ++i)
 	{
 		auto str = ui_.table->item(i,0)->text();
 		for(int j = 0 ; j < str.size(); j++)
@@ -234,10 +256,11 @@ bool MainWindow::CheckTable() const
 
 bool MainWindow::CheckPositions() const
 {
+
 	std::vector <bool> check(settings_.scremblers_count);
-	for (int i = 0 ; i < settings_.scremblers_count ; i++)
+	for (int i = 0 ; i < settings_.scremblers_count ; ++i)
 	{
-		auto content = GetContent(i,3);
+		auto content = GetContentLineEdit(i,1);
 		auto num = content.toInt();
 		if(check[num - 1])
 			return false;
@@ -257,9 +280,9 @@ void MainWindow::Reset() const
 
 }
 
-QString MainWindow::GetContent(int row,int col)	const
+QString MainWindow::GetContentLineEdit(int row,int col)	const
 {
-	QWidget* cell = ui_.table->cellWidget(row,col);
+	auto cell = ui_.table->cellWidget(row,col);
 	auto line = dynamic_cast<QLineEdit*>(cell);
 	return line->text();
 }
@@ -272,4 +295,30 @@ void MainWindow::ChoosePathToFile( )
 	{
 			ui_.path_to_file_input->setText( file_name );
 	}
+}
+
+void MainWindow::GetScremblerSettings()	 const
+{
+
+	for(int i = 0 ; i < settings_.scremblers_count ; ++i)
+	{
+		settings_.scremblers = {};
+		std::shared_ptr<ScremblerSettings> set(new ScremblerSettings{});
+
+		auto str = ui_.table->item(i,0)->text();
+		set->polinoms = str;
+		set->start_pos = GetContentLineEdit(i,3);
+
+		auto tmp = ui_.table->cellWidget(i,2);
+		auto combo = dynamic_cast<QComboBox*>(tmp);
+		set->type = combo->currentIndex();
+
+		set->period = GetContentLineEdit(i,4);
+		set->word_size = ui_.scrembler_word_input->currentIndex() + 1;
+		auto number = GetContentLineEdit(i,1).toInt();
+		settings_.positions_in_code[number - 1] = i;
+		settings_.period = ui_.period_input->text().toULongLong();
+		settings_.scremblers.push_back( set );
+	}
+
 }

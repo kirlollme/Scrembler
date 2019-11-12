@@ -1,41 +1,36 @@
 #pragma once
 
-#include <vector>
+#include "defs.h"
 #include <QString>
 #include <QStringList>
 #include <algorithm>
-
-class Scrembler
-{
+#include <vector>
+class Scrembler {
 public:
-	size_t size											{ 0 };
-	std::vector <uint8_t> items							{   };
-	
-	std::vector <uint8_t>	start_items					{   };
-	std::vector <bool>		xor_items					{   };
+  size_t size{0};
+  std::vector<uint8_t> items_{};
 
-	size_t					period						{	};
-	int						word_len					{	};
-	size_t					current_element				{	};
-	QString					polinoms_str				{	};
-	QString					start_pos_str				{	};
-	QString					period_str					{	};
+  std::vector<uint8_t> start_items_{};
+  std::vector<bool> xor_items_{};
 
-	uint8_t GetItem();
+  size_t period_{};
+  int word_len_{};
+  size_t current_element_{};
+  QString polinoms_str_{};
+  QString start_pos_str_{};
+  QString period_str_{};
+  bool multi{};
+  uint8_t GetItem();
 
-	void Restart();
+  void Restart();
 
-	Scrembler(QString polinoms, QString start_pos, QString period,int word_size);
+  Scrembler(ScremblerSettings&);
 
 private:
-	void Counter();
-	uint8_t GetChar(QChar);
-	void NextItem();
-};
-enum size_scemblers : int 
-{ 
-	bin = 2,
-	x4 = 4,
-	octal = 8,
-	hex = 16
+  void Init();
+  void Counter();
+  uint8_t GetChar(QChar);
+  void NextItem();
+  void NextItem(uint8_t ch);
+  uint8_t GetItem(uint8_t ch);
 };
