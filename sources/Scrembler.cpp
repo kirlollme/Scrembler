@@ -3,6 +3,7 @@
 Scrembler::Scrembler(QString polinoms, QString start_pos, QString prd,int word_size)
 {
 	// перевод строки с полиномами в инт список
+	word_len = word_size;
 	auto list_polinoms_str = polinoms.split(",");
 	std::vector <int> list_polinoms;
 	polinoms_str = polinoms; 
@@ -33,9 +34,9 @@ Scrembler::Scrembler(QString polinoms, QString start_pos, QString prd,int word_s
 	period = prd.toULongLong();
 }
 
-bool Scrembler::GetItem()
+uint8_t Scrembler::GetItem()
 {
-	bool out = items[items.size()-1];
+	uint8_t out = items[items.size()-1];
 	NextItem();
 	return out;
 
@@ -52,7 +53,7 @@ void Scrembler::Restart()
 
 void Scrembler::NextItem()
 {
-	bool item = items.back();
+	uint8_t item = items.back();
 
 	for (int i = 0 ; i < xor_items.size() - 1 ; i++)
 	{
@@ -73,8 +74,8 @@ void Scrembler::NextItem()
 
 void Scrembler::Counter()
 {
-	current_element++;
-	if (current_element == period)
+	current_element+=word_len;
+	if (current_element >= period)
 	{
 		current_element = 0;
 		items = start_items;

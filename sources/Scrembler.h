@@ -21,7 +21,7 @@ public:
 	QString					start_pos_str				{	};
 	QString					period_str					{	};
 
-	bool GetItem();
+	uint8_t GetItem();
 
 	void Restart();
 
