@@ -43,6 +43,13 @@ bool Scrembler::GetItem()
 
 }
 
+uint8_t Scrembler::GetItem(uint8_t ch)
+{
+	NextItem(ch);
+	bool out = items[0];
+	return out;
+}
+
 void Scrembler::Restart()
 {
 	current_element = 0;
@@ -70,7 +77,27 @@ void Scrembler::NextItem()
 	Counter();
 	return;
 }
+void Scrembler::NextItem(uint8_t ch)
+{
+	uint8_t item = items.back();
 
+	for (int i = 0; i < xor_items.size() - 1; i++)
+	{
+		if (xor_items[i])
+			item = item ^ items[i];
+	}
+	items.pop_back();
+	std::vector <uint8_t> new_items;
+	item = item ^ ch;
+	new_items.push_back(item);
+	for (int i = 0; i < items.size(); i++)
+	{
+		new_items.push_back(items[i]);
+	}
+	items = new_items;
+	Counter();
+	return;
+}
 void Scrembler::Counter()
 {
 	current_element++;

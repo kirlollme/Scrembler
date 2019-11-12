@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>729</width>
+    <width>800</width>
     <height>635</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>600</width>
+    <width>800</width>
     <height>500</height>
    </size>
   </property>
@@ -39,53 +39,10 @@
     </size>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="path_to_file_input"/>
-    </item>
-    <item row="5" column="5">
-     <widget class="QLineEdit" name="period_input">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>1024</string>
-      </property>
-     </widget>
-    </item>
     <item row="3" column="5">
      <widget class="QPushButton" name="input_accept_button">
       <property name="text">
        <string>Принять</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="2">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLabel" name="path_to_file_label">
-      <property name="text">
-       <string>Путь до файла</string>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="5">
-     <widget class="QPushButton" name="start_button">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Закодировать</string>
       </property>
      </widget>
     </item>
@@ -113,6 +70,43 @@
       </item>
      </widget>
     </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="path_to_file_label">
+      <property name="text">
+       <string>Путь до файла</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="4">
+     <widget class="QLabel" name="period_label">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Общий период</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="5">
+     <widget class="QLineEdit" name="period_input">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>1024</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="5">
+     <widget class="QPushButton" name="start_button">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Закодировать</string>
+      </property>
+     </widget>
+    </item>
     <item row="8" column="1" colspan="5">
      <widget class="QTableWidget" name="table">
       <property name="enabled">
@@ -132,19 +126,6 @@
       </property>
      </widget>
     </item>
-    <item row="5" column="4">
-     <widget class="QLabel" name="period_label">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Общий период</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QLineEdit" name="input"/>
-    </item>
     <item row="3" column="3">
      <spacer name="horizontalSpacer_2">
       <property name="orientation">
@@ -157,6 +138,25 @@
        </size>
       </property>
      </spacer>
+    </item>
+    <item row="3" column="2">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="path_to_file_input"/>
+    </item>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="input"/>
     </item>
     <item row="2" column="1">
      <widget class="QLabel" name="input_label">

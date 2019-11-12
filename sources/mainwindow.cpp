@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	auto validator = new QIntValidator(0, 10000, this);
 	ui_.input->setValidator(validator);
 	ui_.period_input->setValidator(new QRegExpValidator(QRegExp("[0-9]{" + QString::number(20)  + "}"),this));							   
-	//ui_.period_input->setValidator(new QRegExpValidator(QRegExp("[0-F]{" + QString::number(20)  + "}"),this));
+
 	
 }
 void MainWindow::slotInputClicked() const
@@ -58,7 +58,7 @@ void MainWindow::slotTableChanged(QTableWidgetItem * itm) const
 	{
 		start_pos[polinoms[0] - item] = '1';
 	}
-	auto col  = itm->column() + 1;
+	auto col  = itm->column() + 3;
 	auto row  = itm->row();
 	UpdItem(row,col,polinoms[0],start_pos);
 
@@ -98,9 +98,11 @@ void MainWindow::CreateRows() const
 	std::vector <QString> header_list
 	{ 
 		"Полином",
+		"Тип скремблера",
+		"Номер в кодировании",
 		"Начальная установка",
-		"Период",
-		"Номер в кодировании"
+		"Период"
+		//"Номер в кодировании"
 	};
 
 	std::vector <QString> size_word 
@@ -114,7 +116,7 @@ void MainWindow::CreateRows() const
 	ui_.table->setRowCount(0);
 	ui_.table->setColumnCount(header_list.size());
 	ui_.table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
+	ui_.table->setEnabled(1);
 
 	for (int i = 0; i < header_list.size(); i++)
 	{
@@ -136,6 +138,25 @@ void MainWindow::CreateRows() const
 		item->setText("10,8,2");
 		ui_.table->setItem(i, 0, item);
 	} 
+	// вид скремблера
+	for (size_t i = 0; i < scremblers_count_; i++)
+	{
+		QComboBox *item = new QComboBox();
+		item->addItem("Мультипликативный",0);
+		item->addItem("Аддитивный",1);
+		item->setFrame(false);
+		ui_.table->setCellWidget(i, 1, item);
+	}
+	// порядок в кодировании
+	for (size_t i = 0; i < scremblers_count_; i++)
+	{
+		QLineEdit *edit = new QLineEdit(ui_.table);
+		edit->setFrame(false);
+		edit->setValidator(new QIntValidator(1, scremblers_count_, edit));
+		edit->setText(QString::number(i + 1));
+		ui_.table->setCellWidget(i, 2, edit);
+	}
+
 	//начальное состояние
 	for (size_t i = 0 ; i < scremblers_count_; i++)
 	{
@@ -144,7 +165,8 @@ void MainWindow::CreateRows() const
 		edit->setText("1010000010");
 		
 		edit->setValidator(new QRegExpValidator(QRegExp( size_word[ ui_.scrembler_word_input->currentIndex( ) ] + QString::number( 10 )  + "}" ) , edit ) );
-		ui_.table->setCellWidget(i, 1, edit);
+		ui_.table->setCellWidget(i, 3, edit);
+		//ui_.table->item.setEnabled(0);
 	} 
 	// период
 
@@ -153,19 +175,22 @@ void MainWindow::CreateRows() const
 		QLineEdit *edit = new QLineEdit(ui_.table);
 		edit->setFrame(false);
 		edit->setText("1024");
-		edit->setValidator(new QIntValidator());	 
-		ui_.table->setCellWidget(i, 2, edit);
+		edit->setValidator(new QIntValidator());	
+		//edit->setEnabled(0);
+		ui_.table->setCellWidget(i, 4, edit);
+
 	}
-	// порядок в кодировании
-	for (size_t i = 0 ; i < scremblers_count_; i++)
-	{
-		QLineEdit *edit = new QLineEdit(ui_.table);
-		edit->setFrame(false);
-		edit->setValidator(new QIntValidator(1, scremblers_count_, edit));	 
-		edit->setText(QString::number(i+1));
-		ui_.table->setCellWidget(i, 3, edit);
-	} 
-	ui_.table				-> setEnabled(1);
+	//connect(ui_.table, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(slotChangeType(int,int)));
+	connect(ui_.table, SIGNAL(cellClicked(int, int)),
+		this, SLOT(slotChangeType(int, int)));
+}
+void MainWindow::slotChangeType(int col,int row) const
+{
+	QMessageBox::information(0, " ",
+		"Cell at row "+QString::number(row)+
+		" column "+QString::number(col)+
+		" was double clicked.");
+
 }
 
 void MainWindow::slotBlockScrembler() const

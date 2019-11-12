@@ -9,7 +9,6 @@
 
 #include "Scrembler.h"
 #include "Encoder.h"
-#include "reader.h"
 
 #include "ui_mainwindow.h"
 
@@ -20,6 +19,7 @@
 #include <QFile>
 #include <QDir>
 #include <QFileInfo>
+#include <QApplication>
 
 
 class MainWindow : public QMainWindow
@@ -70,8 +70,10 @@ public slots:
 	void slotInputClicked() const;
 	void slotTableChanged(QTableWidgetItem * itm) const;
 	void slotStart() const;
+	void slotChangeType(int col, int row) const;
 
 private:
+	//void ChangeType(int col, int row) const;
     Ui::MainWindow ui_;
 };
 
